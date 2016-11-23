@@ -1,9 +1,16 @@
 {
   "name": "connect-arangodb-session",
   "description": "ArangoDB session store for connect/express",
-  "version": "0.1.0-alpha",
+  "version": "0.1.0-alpha1",
   "license": "Apache-2.0",
-  "author": "Graham Lee Bevan <graham.bevan@ntlworld.com>",
+  "author": {
+    name: "Graham Lee Bevan",
+    email: "graham.bevan@ntlworld.com"
+  },
+  "repository": {
+    "url": "https://github.com/partoutx/connect-arangodb-session",
+    "type": "git"
+  },
   "dependencies": {
     "arangojs": "^5.3.0",
     "better-console": "^0.2.4",
