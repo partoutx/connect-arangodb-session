@@ -4,8 +4,8 @@
   "version": "0.1.0-alpha1",
   "license": "Apache-2.0",
   "author": {
-    name: "Graham Lee Bevan",
-    email: "graham.bevan@ntlworld.com"
+    "name": "Graham Lee Bevan",
+    "email": "graham.bevan@ntlworld.com"
   },
   "repository": {
     "url": "https://github.com/partoutx/connect-arangodb-session",
