@@ -1,0 +1,21 @@
+{
+  "name": "connect-arangodb-session",
+  "description": "ArangoDB session store for connect/express",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "author": "Graham Lee Bevan <graham.bevan@ntlworld.com>",
+  "dependencies": {
+    "arangojs": "^5.3.0",
+    "better-console": "^0.2.4",
+    "lodash": "^4.17.2",
+    "q": "^1.4.1"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-watch": "^4.3.11",
+    "mocha": "^3.1.2"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  }
+}
