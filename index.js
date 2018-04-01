@@ -60,11 +60,14 @@ const init = function (connect) {
 
       Store.call(self, defaults);
       self.options = defaults;
-
-      self.db = arangojs({
-        url: options.url,
-        promise: Q.promise
-      });
+      var arangoOptions = {
+        'url': options.url,
+        'promise': Q.promise
+      }
+      if ( options.agentOptions ) {
+        arangoOptions.agentOptions = options.agentOptions;
+      }
+      self.db = arangojs( arangoOptions );
 
       self.db.listUserDatabases()
       .then(function (databases) {
