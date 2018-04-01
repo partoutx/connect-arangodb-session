@@ -1,7 +1,7 @@
 {
   "name": "connect-arangodb-session",
   "description": "ArangoDB session store for connect/express",
-  "version": "0.1.0-alpha1",
+  "version": "0.2.0-alpha1",
   "license": "Apache-2.0",
   "author": {
     "name": "Graham Lee Bevan",
