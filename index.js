@@ -60,60 +60,62 @@ const init = function (connect) {
 
       Store.call(self, defaults);
       self.options = defaults;
-      var arangoOptions = {
-        'url': options.url,
-        'promise': Q.promise
+
+      self.db = arangojs({
+        url: options.url,
+        databaseName: options.dbName,
+        promise: Q.promise
+      });
+
+      if(options.user && options.password){
+        self.db.useBasicAuth(options.user, options.password);
       }
-      if ( options.agentOptions ) {
-        arangoOptions.agentOptions = options.agentOptions;
-      }
-      self.db = arangojs( arangoOptions );
 
       self.db.listUserDatabases()
-      .then(function (databases) {
+          .then(function (databases) {
 
-        // Test if db exists
-        let dbExists = (databases.filter(function (d) {
-          return d === self.options.dbName;
-        }).length > 0);
-
-        if (!dbExists) {
-          // Create the database
-          return self.db.createDatabase(self.options.dbName)
-          .then(function(info) {
-            self.db.useDatabase(self.options.dbName);
-          });
-        } else {
-          self.db.useDatabase(self.options.dbName);
-          return Q();
-        }
-      })
-      .done(function () {
-        self.collection = self.db.collection(self.options.collection);
-
-        self.db.listCollections()
-        .then(function (collections) {
-          let colExists = false;
-
-          if (collections) {
-            colExists = (collections.filter(function (d) {
-              return d.name === self.options.collection;
+            // Test if db exists
+            let dbExists = (databases.filter(function (d) {
+              return d === self.options.dbName;
             }).length > 0);
-          }
 
-          if (colExists) {
-            return callback();
-          } else {
-            self.collection.create()
-            .then(function () {
-              return callback();
-            });
-          }
-        });
-      }, function(err) {
-        console.warn('Failed to talk to ArangoDB, maybe the service isn\'t running?:', err);
+            if (!dbExists) {
+              // Create the database
+              return self.db.createDatabase(self.options.dbName)
+                  .then(function(info) {
+                    self.db.useDatabase(self.options.dbName);
+                  });
+            } else {
+              self.db.useDatabase(self.options.dbName);
+              return Q();
+            }
+          })
+          .done(function () {
+            self.collection = self.db.collection(self.options.collection);
 
-      });
+            self.db.listCollections()
+                .then(function (collections) {
+                  let colExists = false;
+
+                  if (collections) {
+                    colExists = (collections.filter(function (d) {
+                      return d.name === self.options.collection;
+                    }).length > 0);
+                  }
+
+                  if (colExists) {
+                    return callback();
+                  } else {
+                    self.collection.create()
+                        .then(function () {
+                          return callback();
+                        });
+                  }
+                });
+          }, function(err) {
+            console.warn('Failed to talk to ArangoDB, maybe the service isn\'t running?:', err);
+
+          });
     }
 
     handleError(error, callback) {
@@ -134,7 +136,7 @@ const init = function (connect) {
 
   _.mixin(ArangoDBStore.prototype, Store.prototype);
 
-   ArangoDBStore.prototype._generateQuery = function(id) {
+  ArangoDBStore.prototype._generateQuery = function(id) {
     var ret = {};
     ret[this.options.idField] = id;
     return ret;
@@ -161,17 +163,17 @@ const init = function (connect) {
       }
       if (cursor.count === 1) {
         cursor.next()
-        .then(function (session) {
-          if (session) {
-            if (!session.expires || new Date() < new Date(session.expires)) {
-              return callback(null, session.session);
-            } else {
-              return self.destroy(id, callback);
-            }
-          } else {
-            return callback();
-          }
-        });
+            .then(function (session) {
+              if (session) {
+                if (!session.expires || new Date() < new Date(session.expires)) {
+                  return callback(null, session.session);
+                } else {
+                  return self.destroy(id, callback);
+                }
+              } else {
+                return callback();
+              }
+            });
       } else {
         return callback();
       }
@@ -187,15 +189,15 @@ const init = function (connect) {
     }
 
     self.collection
-    .removeByExample(this._generateQuery(id), function(error) {
-      if (error) {
-        var e = new Error('Error destroying ' + id + ': ' + error.message);
-        return self._errorHandler(e, callback);
-      }
-      if (callback) {
-        callback();
-      }
-    });
+        .removeByExample(this._generateQuery(id), function(error) {
+          if (error) {
+            var e = new Error('Error destroying ' + id + ': ' + error.message);
+            return self._errorHandler(e, callback);
+          }
+          if (callback) {
+            callback();
+          }
+        });
   };
 
   ArangoDBStore.prototype.clear = function(callback) {
@@ -207,15 +209,15 @@ const init = function (connect) {
     }
 
     self.collection
-    .removeByExample({}, function(error) {
-      if (error) {
-        var e = new Error('Error clearing all sessions: ' + error.message);
-        return self._errorHandler(e, callback);
-      }
-      if (callback) {
-        callback();
-      }
-    });
+        .removeByExample({}, function(error) {
+          if (error) {
+            var e = new Error('Error clearing all sessions: ' + error.message);
+            return self._errorHandler(e, callback);
+          }
+          if (callback) {
+            callback();
+          }
+        });
   };
 
   ArangoDBStore.prototype.set = function(id, session, callback) {
@@ -247,29 +249,29 @@ const init = function (connect) {
 
     // upsert
     self.collection.byExample(this._generateQuery(id))
-    .then(function (cursor) {
-      if (cursor.count > 1) {
-        var err = new Error('queryOne returned more than 1 result');
-        console.error(err);
-        return callback(err);
-      }
-      if (cursor.count === 1) {
-        cursor.next()
-        .then(function (existing_doc) {
-          s._key = existing_doc._key;
-          self.collection.update({_key: s._key}, s)
-          .then(function () {
-            return callback();
-          }, function (err) {
+        .then(function (cursor) {
+          if (cursor.count > 1) {
+            var err = new Error('queryOne returned more than 1 result');
             console.error(err);
             return callback(err);
-          });
+          }
+          if (cursor.count === 1) {
+            cursor.next()
+                .then(function (existing_doc) {
+                  s._key = existing_doc._key;
+                  self.collection.update({_key: s._key}, s)
+                      .then(function () {
+                        return callback();
+                      }, function (err) {
+                        console.error(err);
+                        return callback(err);
+                      });
+                });
+          } else {
+            self.collection.save(s);
+            return callback();
+          }
         });
-      } else {
-        self.collection.save(s);
-        return callback();
-      }
-    });
 
   };
 
